@@ -1,0 +1,62 @@
+{
+  "expo": {
+    "name": "Roam",
+    "slug": "roam",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1E4010"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.roam.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Roam uses your location to pin experiences exactly where they happened.",
+        "NSLocationAlwaysUsageDescription": "Roam uses your location to pin experiences exactly where they happened.",
+        "NSCameraUsageDescription": "Roam uses your camera to add real photos to your memories.",
+        "NSPhotoLibraryUsageDescription": "Roam accesses your photo library to attach images to experiences.",
+        "NSPhotoLibraryAddUsageDescription": "Roam saves photos from your memories to your library."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1E4010"
+      },
+      "package": "com.roam.app",
+      "versionCode": 1,
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-location",
+      "expo-image-picker",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Roam uses your camera to add photos to memories."
+        }
+      ]
+    ],
+    "scheme": "roam",
+    "extra": {
+      "eas": {
+        "projectId": "YOUR_EAS_PROJECT_ID"
+      }
+    }
+  }
+}
