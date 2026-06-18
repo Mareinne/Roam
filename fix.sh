@@ -2,10 +2,9 @@
 set -e
 
 echo "🧹 Cleaning old install..."
-rm -rf node_modules
-rm -f package-lock.json
+rm -rf node_modules package-lock.json .expo
 
-echo "📦 Installing with legacy peer deps..."
+echo "📦 Installing..."
 npm install --legacy-peer-deps
 
 echo "✅ Done. Starting Expo..."

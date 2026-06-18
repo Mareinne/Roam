@@ -17,7 +17,6 @@
       "buildNumber": "1",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Roam uses your location to pin experiences exactly where they happened.",
-        "NSLocationAlwaysUsageDescription": "Roam uses your location to pin experiences exactly where they happened.",
         "NSCameraUsageDescription": "Roam uses your camera to add real photos to your memories.",
         "NSPhotoLibraryUsageDescription": "Roam accesses your photo library to attach images to experiences.",
         "NSPhotoLibraryAddUsageDescription": "Roam saves photos from your memories to your library."
@@ -42,7 +41,6 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-router",
       "expo-location",
       "expo-image-picker",
       [
@@ -52,7 +50,6 @@
         }
       ]
     ],
-    "scheme": "roam",
     "extra": {
       "eas": {
         "projectId": "YOUR_EAS_PROJECT_ID"
