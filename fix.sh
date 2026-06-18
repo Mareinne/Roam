@@ -1,16 +1,15 @@
 #!/bin/bash
 set -e
-echo "📥 Pulling latest code..."
+echo "📥 Pulling latest..."
 git pull
 
-echo "🧹 Nuking everything..."
+echo "🧹 Cleaning node_modules and caches..."
 rm -rf node_modules .expo
-# Clear all caches
 npm cache clean --force 2>/dev/null || true
-rm -rf /tmp/metro-* /tmp/haste-* ~/Library/Caches/com.facebook.ReactNativeBuild 2>/dev/null || true
+rm -rf /tmp/metro-* /tmp/haste-* 2>/dev/null || true
 
-echo "📦 Installing from lockfile (exact versions, no surprises)..."
+echo "📦 Installing exact versions from lockfile..."
 npm ci --legacy-peer-deps
 
-echo "✅ Starting Expo..."
+echo "✅ Starting Expo — scan QR with Expo Go..."
 npx expo start

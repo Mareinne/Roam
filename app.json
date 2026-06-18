@@ -16,7 +16,6 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.roam.app",
-      "buildNumber": "1",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Roam uses your location to pin experiences exactly where they happened.",
         "NSCameraUsageDescription": "Roam uses your camera to add real photos to your memories.",
@@ -29,25 +28,11 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#1E4010"
       },
-      "package": "com.roam.app",
-      "versionCode": 1,
-      "permissions": [
-        "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION",
-        "CAMERA",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
-      ]
+      "package": "com.roam.app"
     },
     "plugins": [
       "expo-location",
-      "expo-image-picker",
-      [
-        "expo-camera",
-        {
-          "cameraPermission": "Roam uses your camera to add photos to memories."
-        }
-      ]
+      "expo-image-picker"
     ]
   }
 }
