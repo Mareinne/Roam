@@ -37,9 +37,6 @@
         "WRITE_EXTERNAL_STORAGE"
       ]
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
     "plugins": [
       "expo-location",
       "expo-image-picker",
@@ -49,11 +46,6 @@
           "cameraPermission": "Roam uses your camera to add photos to memories."
         }
       ]
-    ],
-    "extra": {
-      "eas": {
-        "projectId": "YOUR_EAS_PROJECT_ID"
-      }
-    }
+    ]
   }
 }

@@ -1,11 +1,11 @@
 #!/bin/bash
 set -e
 
-echo "🧹 Cleaning old install..."
+echo "🧹 Cleaning..."
 rm -rf node_modules package-lock.json .expo
 
 echo "📦 Installing..."
 npm install --legacy-peer-deps
 
-echo "✅ Done. Starting Expo..."
-npx expo start --no-dev --tunnel
+echo "✅ Starting Expo (no account needed)..."
+npx expo start
