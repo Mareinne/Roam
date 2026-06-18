@@ -8,4 +8,4 @@ echo "📦 Installing..."
 npm install --legacy-peer-deps
 
 echo "✅ Done. Starting Expo..."
-npx expo start --clear
+npx expo start --no-dev --tunnel
