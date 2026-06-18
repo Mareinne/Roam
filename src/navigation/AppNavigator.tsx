@@ -1,8 +1,8 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
-import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { Text, View, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 
 import { MapScreen } from '../screens/MapScreen';
 import { ListScreen } from '../screens/ListScreen';
@@ -10,25 +10,42 @@ import { LogScreen } from '../screens/LogScreen';
 import { FriendsScreen } from '../screens/FriendsScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { DetailScreen } from '../screens/DetailScreen';
-import { Colors, Radius } from '../theme';
+import { Colors } from '../theme';
 
-const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator();
+export type RootStackParamList = {
+  Tabs: undefined;
+  Detail: { experienceId: string };
+  Log: undefined;
+};
 
-function TabIcon({ emoji, label, focused }: { emoji: string; label: string; focused: boolean }) {
+export type TabParamList = {
+  Map: undefined;
+  List: undefined;
+  Friends: undefined;
+  You: undefined;
+};
+
+const Tab = createBottomTabNavigator<TabParamList>();
+const Stack = createNativeStackNavigator<RootStackParamList>();
+
+function TabIcon({
+  emoji,
+  label,
+  focused,
+}: {
+  emoji: string;
+  label: string;
+  focused: boolean;
+}) {
   return (
     <View style={styles.tabItem}>
-      <Text style={[styles.tabEmoji, focused && styles.tabEmojiFocused]}>{emoji}</Text>
-      <Text style={[styles.tabLabel, focused && styles.tabLabelFocused]}>{label}</Text>
+      <Text style={[styles.tabEmoji, focused && styles.tabEmojiFocused]}>
+        {emoji}
+      </Text>
+      <Text style={[styles.tabLabel, focused && styles.tabLabelFocused]}>
+        {label}
+      </Text>
     </View>
-  );
-}
-
-function LogTabButton({ onPress }: { onPress?: () => void }) {
-  return (
-    <TouchableOpacity style={styles.logTabBtn} onPress={onPress} activeOpacity={0.85}>
-      <Text style={styles.logTabIcon}>＋</Text>
-    </TouchableOpacity>
   );
 }
 
@@ -56,16 +73,6 @@ function TabNavigator() {
         options={{
           tabBarIcon: ({ focused }) => (
             <TabIcon emoji="☰" label="List" focused={focused} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Log"
-        component={LogScreen}
-        options={{
-          tabBarIcon: () => null,
-          tabBarButton: (props) => (
-            <LogTabButton onPress={props.onPress as () => void} />
           ),
         }}
       />
@@ -100,7 +107,15 @@ export function AppNavigator() {
           name="Detail"
           component={DetailScreen}
           options={{
-            presentation: 'card',
+            animation: 'slide_from_right',
+            gestureEnabled: true,
+          }}
+        />
+        <Stack.Screen
+          name="Log"
+          component={LogScreen}
+          options={{
+            animation: 'slide_from_bottom',
             gestureEnabled: true,
           }}
         />
@@ -114,8 +129,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(253,250,245,0.97)',
     borderTopWidth: 1,
     borderTopColor: Colors.border,
-    height: 80,
-    paddingBottom: 16,
+    height: Platform.OS === 'ios' ? 84 : 68,
+    paddingBottom: Platform.OS === 'ios' ? 24 : 10,
     paddingTop: 8,
   },
   tabItem: {
@@ -136,24 +151,5 @@ const styles = StyleSheet.create({
   },
   tabLabelFocused: {
     color: Colors.pine,
-  },
-  logTabBtn: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: Colors.terracotta,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 10,
-    shadowColor: Colors.terracotta,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-    elevation: 6,
-  },
-  logTabIcon: {
-    fontSize: 28,
-    color: '#fff',
-    lineHeight: 32,
   },
 });
