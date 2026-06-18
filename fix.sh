@@ -4,8 +4,8 @@ set -e
 echo "🧹 Cleaning..."
 rm -rf node_modules package-lock.json .expo
 
-echo "📦 Installing..."
+echo "📦 Installing (SDK 54)..."
 npm install --legacy-peer-deps
 
-echo "✅ Starting Expo (no account needed)..."
+echo "✅ Starting — scan QR with Expo Go..."
 npx expo start
