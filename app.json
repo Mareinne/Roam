@@ -7,7 +7,6 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -15,13 +14,7 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.roam.app",
-      "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Roam uses your location to pin experiences exactly where they happened.",
-        "NSCameraUsageDescription": "Roam uses your camera to add real photos to your memories.",
-        "NSPhotoLibraryUsageDescription": "Roam accesses your photo library to attach images to experiences.",
-        "NSPhotoLibraryAddUsageDescription": "Roam saves photos from your memories to your library."
-      }
+      "bundleIdentifier": "com.roam.app"
     },
     "android": {
       "adaptiveIcon": {
@@ -29,10 +22,6 @@
         "backgroundColor": "#1E4010"
       },
       "package": "com.roam.app"
-    },
-    "plugins": [
-      "expo-location",
-      "expo-image-picker"
-    ]
+    }
   }
 }
