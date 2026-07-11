@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, useState } from 'react';
+import React, { useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Platform,
 } from 'react-native';
+import MapView, { Marker, Region } from 'react-native-maps';
 import { useRoamStore } from '../store/useRoamStore';
 import { FilterBar } from '../components/FilterBar';
 import { FriendsFilterBar } from '../components/FriendsFilterBar';
@@ -16,13 +17,9 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 
-// Lazy import MapView to prevent top-level native module crash before bridge ready
-const MapView = require('react-native-maps').default;
-const { Marker } = require('react-native-maps');
-
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-const CANCUN_REGION = {
+const CANCUN_REGION: Region = {
   latitude: 21.12,
   longitude: -86.81,
   latitudeDelta: 0.18,
@@ -30,10 +27,9 @@ const CANCUN_REGION = {
 };
 
 export function MapScreen() {
-  const mapRef = useRef<any>(null);
+  const mapRef = useRef<MapView>(null);
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
-  const [mapReady, setMapReady] = useState(false);
 
   const {
     activeFilter, setFilter,
@@ -60,9 +56,8 @@ export function MapScreen() {
         initialRegion={CANCUN_REGION}
         showsUserLocation
         showsMyLocationButton={false}
-        onMapReady={() => setMapReady(true)}
       >
-        {mapReady && visible.map((exp) => (
+        {visible.map((exp) => (
           <Marker
             key={exp.id}
             coordinate={{ latitude: exp.latitude, longitude: exp.longitude }}
@@ -116,9 +111,12 @@ export function MapScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.sand },
-  topOverlay: { position: 'absolute', top: 0, left: 0, right: 0 },
+  topOverlay: {
+    position: 'absolute', top: 0, left: 0, right: 0,
+  },
   destPill: {
-    flexDirection: 'row', alignItems: 'center', alignSelf: 'center',
+    flexDirection: 'row', alignItems: 'center',
+    alignSelf: 'center',
     backgroundColor: Colors.pine,
     paddingHorizontal: Spacing.lg, paddingVertical: Spacing.sm,
     borderRadius: Radius.full, marginBottom: Spacing.sm, gap: Spacing.sm,

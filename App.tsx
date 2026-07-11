@@ -1,9 +1,13 @@
-import { Text, View } from 'react-native';
+import React from 'react';
+import { StatusBar } from 'expo-status-bar';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { AppNavigator } from './src/navigation/AppNavigator';
 
 export default function App() {
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#1E4010' }}>
-      <Text style={{ color: 'white', fontSize: 32 }}>🌿 Roam</Text>
-    </View>
+    <SafeAreaProvider>
+      <StatusBar style="dark" />
+      <AppNavigator />
+    </SafeAreaProvider>
   );
 }
