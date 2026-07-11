@@ -6,13 +6,17 @@
     "sdkVersion": "54.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#1E4010"
     },
-    "ios": { "supportsTablet": false, "bundleIdentifier": "com.roam.app" },
-    "android": { "package": "com.roam.app" }
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.roam.app"
+    },
+    "android": {
+      "package": "com.roam.app"
+    }
   }
 }
