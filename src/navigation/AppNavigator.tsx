@@ -7,13 +7,13 @@ import { Text, View, StyleSheet, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
+import { FeedScreen } from '../screens/FeedScreen';
 import { MapScreen } from '../screens/MapScreen';
-import { ListScreen } from '../screens/ListScreen';
-import { LogScreen } from '../screens/LogScreen';
+import { PreTripScreen } from '../screens/PreTripScreen';
 import { FriendsScreen } from '../screens/FriendsScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { DetailScreen } from '../screens/DetailScreen';
-import { PreTripScreen } from '../screens/PreTripScreen';
+import { LogScreen } from '../screens/LogScreen';
 import { TripDetectionBanner } from '../components/TripDetectionBanner';
 import { Colors } from '../theme';
 
@@ -24,8 +24,8 @@ export type RootStackParamList = {
 };
 
 export type TabParamList = {
+  Feed: undefined;
   Map: undefined;
-  List: undefined;
   PreTrip: undefined;
   Friends: undefined;
   You: undefined;
@@ -56,14 +56,14 @@ function TabNavigator() {
         }}
       >
         <Tab.Screen
+          name="Feed"
+          component={FeedScreen}
+          options={{ tabBarIcon: ({ focused }) => <TabIcon emoji="✦" label="Feed" focused={focused} /> }}
+        />
+        <Tab.Screen
           name="Map"
           component={MapScreen}
           options={{ tabBarIcon: ({ focused }) => <TabIcon emoji="🗺" label="Map" focused={focused} /> }}
-        />
-        <Tab.Screen
-          name="List"
-          component={ListScreen}
-          options={{ tabBarIcon: ({ focused }) => <TabIcon emoji="☰" label="List" focused={focused} /> }}
         />
         <Tab.Screen
           name="PreTrip"
@@ -82,12 +82,9 @@ function TabNavigator() {
         />
       </Tab.Navigator>
 
-      {/* Trip detection banner floats over all tabs */}
       <TripDetectionBanner
         onLogPress={() => navigation.navigate('Log')}
-        onExplorePress={(city) => {
-          // Navigate to List tab — in a real app you'd deep-link to PreTrip with city
-        }}
+        onExplorePress={(_city) => {}}
       />
     </View>
   );
@@ -118,8 +115,7 @@ export function AppNavigator() {
 const styles = StyleSheet.create({
   tabBar: {
     backgroundColor: 'rgba(253,250,245,0.97)',
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    borderTopWidth: 1, borderTopColor: Colors.border,
     height: Platform.OS === 'ios' ? 84 : 68,
     paddingBottom: Platform.OS === 'ios' ? 24 : 10,
     paddingTop: 8,
