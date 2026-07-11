@@ -86,3 +86,6 @@ export const Radius = {
   xl: 20,
   full: 999,
 };
+
+// Additional color used in PreTripScreen
+export const pineMid = '#2D5C1A';

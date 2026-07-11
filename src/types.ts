@@ -11,10 +11,39 @@ export interface Experience {
   longitude: number;
   rating: number;
   review: string;
-  photos: string[]; // URIs or asset paths
+  photos: string[];
   friendId: string;
-  date: string; // ISO string
+  date: string;
   createdAt: string;
+  // Echo data
+  echoes?: Echo[];
+}
+
+export interface Echo {
+  id: string;
+  experienceId: string;
+  friendId: string;
+  rating: number;
+  note: string;
+  createdAt: string;
+}
+
+export interface Trip {
+  id: string;
+  city: string;
+  country: string;
+  startDate: string;
+  endDate?: string;
+  isActive: boolean;
+}
+
+export interface DetectedCity {
+  city: string;
+  country: string;
+  latitude: number;
+  longitude: number;
+  arrivedAt: string;
+  hasPrompted: boolean;
 }
 
 export interface Friend {
@@ -29,4 +58,4 @@ export interface Friend {
 }
 
 export type FilterType = 'all' | ExperienceType;
-export type SortType = 'rating' | 'recent' | 'friend';
+export type SortType = 'rating' | 'recent' | 'friend' | 'friend-weight';

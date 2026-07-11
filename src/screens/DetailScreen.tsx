@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View, Text, ScrollView, StyleSheet,
   TouchableOpacity, Linking, Platform,
@@ -9,6 +9,7 @@ import { useRoamStore } from '../store/useRoamStore';
 import { Avatar } from '../components/Avatar';
 import { TypeBadge } from '../components/TypeBadge';
 import { StarRating } from '../components/StarRating';
+import { EchoSheet } from '../components/EchoSheet';
 import { Colors, Typography, Spacing, Radius, TypeBgColors, TypeEmojis } from '../theme';
 import { format } from 'date-fns';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -20,12 +21,15 @@ export function DetailScreen() {
   const navigation = useNavigation();
   const route = useRoute<DetailRoute>();
   const { experienceId } = route.params;
+  const [echoVisible, setEchoVisible] = useState(false);
 
-  const { experiences, getFriendById } = useRoamStore();
+  const { experiences, getFriendById, getEchosForExperience, getFriendWeight } = useRoamStore();
   const exp = experiences.find((e) => e.id === experienceId);
   if (!exp) return null;
 
   const friend = getFriendById(exp.friendId);
+  const echoes = getEchosForExperience(experienceId);
+  const friendWeight = getFriendWeight(experienceId);
 
   const openMaps = () => {
     const url = Platform.select({
@@ -62,16 +66,26 @@ export function DetailScreen() {
 
           <Text style={styles.location}>📍 {exp.location}, {exp.city}</Text>
 
+          {/* Friend-weight score if echoed */}
+          {echoes.length > 0 && (
+            <View style={styles.weightRow}>
+              <Text style={styles.weightLabel}>
+                ✦ Friend-weight score: {friendWeight.toFixed(1)}
+              </Text>
+              <Text style={styles.weightSub}>
+                Based on {echoes.length + 1} rating{echoes.length + 1 !== 1 ? 's' : ''} from your network
+              </Text>
+            </View>
+          )}
+
           <View style={styles.starsRow}>
             <StarRating rating={exp.rating} size={20} />
           </View>
 
           {/* Photos row */}
           <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.photosRow}
-            contentContainerStyle={{ gap: Spacing.sm }}
+            horizontal showsHorizontalScrollIndicator={false}
+            style={styles.photosRow} contentContainerStyle={{ gap: Spacing.sm }}
           >
             {(['📸', '🌅', '🦎'] as string[]).map((ph, i) => (
               <View key={i} style={[styles.photo, { backgroundColor: TypeBgColors[exp.type] }]}>
@@ -82,6 +96,26 @@ export function DetailScreen() {
 
           <Text style={styles.sectionLabel}>The honest take</Text>
           <Text style={styles.review}>{exp.review}</Text>
+
+          {/* Echo section */}
+          <TouchableOpacity
+            style={styles.echoBtn}
+            onPress={() => setEchoVisible(true)}
+            activeOpacity={0.85}
+          >
+            <View style={styles.echoBtnLeft}>
+              <Text style={styles.echoBtnIcon}>🔁</Text>
+              <View>
+                <Text style={styles.echoBtnTitle}>
+                  Echo this · {echoes.length} echo{echoes.length !== 1 ? 's' : ''}
+                </Text>
+                <Text style={styles.echoBtnSub}>
+                  Been here? Add your rating to the social proof score.
+                </Text>
+              </View>
+            </View>
+            <Text style={styles.echoBtnArrow}>›</Text>
+          </TouchableOpacity>
 
           <View style={styles.detailsGrid}>
             <View style={styles.detailCell}>
@@ -122,20 +156,23 @@ export function DetailScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      <EchoSheet
+        experienceId={experienceId}
+        experienceName={exp.name}
+        visible={echoVisible}
+        onClose={() => setEchoVisible(false)}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.warm },
-  hero: {
-    height: 220, alignItems: 'center', justifyContent: 'center', position: 'relative',
-  },
+  hero: { height: 220, alignItems: 'center', justifyContent: 'center', position: 'relative' },
   backBtn: {
-    position: 'absolute', left: Spacing.lg,
-    width: 36, height: 36, borderRadius: 18,
-    backgroundColor: 'rgba(255,255,255,0.92)',
-    alignItems: 'center', justifyContent: 'center',
+    position: 'absolute', left: Spacing.lg, width: 36, height: 36, borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.92)', alignItems: 'center', justifyContent: 'center',
   },
   backArrow: { fontSize: 18, color: Colors.ink },
   heroEmoji: { fontSize: 64 },
@@ -152,18 +189,30 @@ const styles = StyleSheet.create({
   },
   ratingText: { fontSize: 14, fontWeight: '800', color: '#8A6D0E' },
   location: { ...Typography.bodySmall, color: Colors.muted, marginBottom: Spacing.sm },
+  weightRow: {
+    backgroundColor: '#EDF3E8', borderRadius: Radius.md,
+    padding: Spacing.md, marginBottom: Spacing.sm,
+    borderWidth: 1, borderColor: Colors.pine + '40',
+  },
+  weightLabel: { fontSize: 13, fontWeight: '700', color: Colors.pine },
+  weightSub: { fontSize: 11, color: Colors.muted, marginTop: 2 },
   starsRow: { marginBottom: Spacing.lg },
   photosRow: { marginBottom: Spacing.lg },
-  photo: {
-    width: 100, height: 80, borderRadius: Radius.md,
-    alignItems: 'center', justifyContent: 'center',
-  },
+  photo: { width: 100, height: 80, borderRadius: Radius.md, alignItems: 'center', justifyContent: 'center' },
   photoEmoji: { fontSize: 32 },
-  sectionLabel: {
-    ...Typography.label, color: Colors.muted,
-    textTransform: 'uppercase', marginBottom: Spacing.sm,
+  sectionLabel: { ...Typography.label, color: Colors.muted, textTransform: 'uppercase', marginBottom: Spacing.sm },
+  review: { ...Typography.bodyMedium, color: '#333', lineHeight: 22, marginBottom: Spacing.xl },
+  echoBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    backgroundColor: Colors.card, borderRadius: Radius.lg,
+    padding: Spacing.md, borderWidth: 1, borderColor: Colors.border,
+    marginBottom: Spacing.xl,
   },
-  review: { ...Typography.bodyMedium, color: '#333', lineHeight: 22, marginBottom: Spacing.xxl },
+  echoBtnLeft: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, flex: 1 },
+  echoBtnIcon: { fontSize: 24 },
+  echoBtnTitle: { fontSize: 14, fontWeight: '700', color: Colors.ink, marginBottom: 2 },
+  echoBtnSub: { fontSize: 12, color: Colors.muted, lineHeight: 16 },
+  echoBtnArrow: { fontSize: 22, color: Colors.muted },
   detailsGrid: {
     flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm,
     marginBottom: Spacing.xxl, padding: Spacing.md,
