@@ -1,4 +1,14 @@
-export type ExperienceType = 'food' | 'nature' | 'nightlife' | 'tip' | 'stay' | 'culture';
+export type ExperienceType =
+  | 'food'
+  | 'nature'
+  | 'nightlife'
+  | 'tip'
+  | 'stay'
+  | 'culture'
+  | 'event'
+  | 'everyday';
+
+export type Mood = 'loved it' | 'solid' | 'meh' | 'skip it';
 
 export interface Experience {
   id: string;
@@ -10,12 +20,14 @@ export interface Experience {
   latitude: number;
   longitude: number;
   rating: number;
+  mood?: Mood;
   review: string;
   photos: string[];
   friendId: string;
   date: string;
   createdAt: string;
-  // Echo data
+  isHometown?: boolean;   // logged in user's home city
+  weekend?: boolean;      // weekend activity flag
   echoes?: Echo[];
 }
 
@@ -55,7 +67,8 @@ export interface Friend {
   memoriesCount: number;
   countriesCount: number;
   isFollowing: boolean;
+  hometown?: string;
 }
 
-export type FilterType = 'all' | ExperienceType;
+export type FilterType = 'all' | ExperienceType | 'hometown' | 'thisweek';
 export type SortType = 'rating' | 'recent' | 'friend' | 'friend-weight';

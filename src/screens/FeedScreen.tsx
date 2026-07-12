@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import {
   View, Text, FlatList, StyleSheet, TouchableOpacity,
-  Image, Animated, RefreshControl, Dimensions,
+  Image, Animated, RefreshControl, Dimensions, ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -10,15 +10,26 @@ import { useRoamStore } from '../store/useRoamStore';
 import { Avatar } from '../components/Avatar';
 import { TypeBadge } from '../components/TypeBadge';
 import { StarRating } from '../components/StarRating';
-import { Colors, Spacing, Radius, TypeBgColors, TypeEmojis, Typography } from '../theme';
+import { Colors, Spacing, Radius, TypeBgColors, TypeEmojis, Typography, MoodEmojis, MoodColors } from '../theme';
 import { Experience } from '../types';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, isThisWeek, isToday } from 'date-fns';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 const { width: W } = Dimensions.get('window');
 
-function FeedCard({ experience, onPress, onEchoPress }: {
+type FeedFilter = 'all' | 'hometown' | 'travel' | 'thisweek';
+
+function timeLabel(dateStr: string): string {
+  const d = new Date(dateStr);
+  if (isToday(d)) return 'Today';
+  if (isThisWeek(d)) return 'This week';
+  return formatDistanceToNow(d, { addSuffix: true });
+}
+
+function FeedCard({
+  experience, onPress, onEchoPress,
+}: {
   experience: Experience;
   onPress: () => void;
   onEchoPress: () => void;
@@ -29,31 +40,37 @@ function FeedCard({ experience, onPress, onEchoPress }: {
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   const onPressIn = () =>
-    Animated.spring(scaleAnim, { toValue: 0.98, useNativeDriver: true, speed: 50 }).start();
+    Animated.spring(scaleAnim, { toValue: 0.985, useNativeDriver: true, speed: 50 }).start();
   const onPressOut = () =>
     Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true, speed: 50 }).start();
 
+  const isHometown = experience.isHometown;
+
   return (
     <Animated.View style={[styles.card, { transform: [{ scale: scaleAnim }] }]}>
-      <TouchableOpacity
-        onPress={onPress}
-        onPressIn={onPressIn}
-        onPressOut={onPressOut}
-        activeOpacity={1}
-      >
+      <TouchableOpacity onPress={onPress} onPressIn={onPressIn} onPressOut={onPressOut} activeOpacity={1}>
         {/* Photo or emoji header */}
         {experience.photos.length > 0 ? (
           <Image source={{ uri: experience.photos[0] }} style={styles.cardPhoto} />
         ) : (
           <View style={[styles.cardPhotoFallback, { backgroundColor: TypeBgColors[experience.type] }]}>
             <Text style={styles.cardPhotoEmoji}>{TypeEmojis[experience.type]}</Text>
+            {isHometown && (
+              <View style={styles.hometownBadge}>
+                <Text style={styles.hometownBadgeText}>🏠 Hometown</Text>
+              </View>
+            )}
           </View>
         )}
 
-        {/* City pill over photo */}
-        <View style={styles.cityPill}>
-          <Text style={styles.cityPillText}>📍 {experience.city}</Text>
-        </View>
+        {/* Location pill over photo */}
+        {experience.photos.length > 0 && (
+          <View style={styles.cityPill}>
+            <Text style={styles.cityPillText}>
+              {isHometown ? '🏠 ' : '📍 '}{experience.city}
+            </Text>
+          </View>
+        )}
 
         <View style={styles.cardBody}>
           {/* Author row */}
@@ -62,19 +79,30 @@ function FeedCard({ experience, onPress, onEchoPress }: {
               <Avatar initials={friend.avatarInitials} color={friend.avatarColor} size={28} />
               <View style={styles.authorMeta}>
                 <Text style={styles.authorName}>{friend.name}</Text>
-                <Text style={styles.authorTime}>
-                  {formatDistanceToNow(new Date(experience.createdAt), { addSuffix: true })}
-                </Text>
+                <Text style={styles.authorTime}>{timeLabel(experience.createdAt)}</Text>
               </View>
               <TypeBadge type={experience.type} size="sm" />
             </View>
           )}
 
-          {/* Name + rating */}
+          {/* Name */}
           <Text style={styles.cardName}>{experience.name}</Text>
-          <View style={styles.ratingRow}>
-            <StarRating rating={experience.rating} size={14} />
-            <Text style={styles.ratingNum}>{experience.rating}.0</Text>
+
+          {/* Location line */}
+          <Text style={styles.cardLocation}>
+            {isHometown ? '🏠' : '📍'} {experience.location}{isHometown ? '' : `, ${experience.city}`}
+          </Text>
+
+          {/* Mood pill + stars */}
+          <View style={styles.metaRow}>
+            {experience.mood && (
+              <View style={[styles.moodPill, { backgroundColor: MoodColors[experience.mood] + '20' }]}>
+                <Text style={[styles.moodText, { color: MoodColors[experience.mood] }]}>
+                  {MoodEmojis[experience.mood]} {experience.mood}
+                </Text>
+              </View>
+            )}
+            <StarRating rating={experience.rating} size={13} />
           </View>
 
           {/* Pull-quote */}
@@ -84,18 +112,14 @@ function FeedCard({ experience, onPress, onEchoPress }: {
             </Text>
           ) : null}
 
-          {/* Footer: echoes + echo button */}
+          {/* Footer */}
           <View style={styles.cardFooter}>
-            {echoes.length > 0 && (
-              <Text style={styles.echoCount}>
-                🔁 {echoes.length} echo{echoes.length !== 1 ? 's' : ''}
-              </Text>
+            {echoes.length > 0 ? (
+              <Text style={styles.echoCount}>🔁 {echoes.length} echo{echoes.length !== 1 ? 's' : ''}</Text>
+            ) : (
+              <View />
             )}
-            <TouchableOpacity
-              style={styles.echoBtn}
-              onPress={onEchoPress}
-              activeOpacity={0.8}
-            >
+            <TouchableOpacity style={styles.echoBtn} onPress={onEchoPress} activeOpacity={0.8}>
               <Text style={styles.echoBtnText}>+ Echo</Text>
             </TouchableOpacity>
           </View>
@@ -110,18 +134,37 @@ export function FeedScreen() {
   const navigation = useNavigation<Nav>();
   const { experiences, friends } = useRoamStore();
   const [refreshing, setRefreshing] = useState(false);
-  const [newPostsBanner, setNewPostsBanner] = useState(false);
+  const [filter, setFilter] = useState<FeedFilter>('all');
 
-  // Feed = all experiences from followed friends, newest first
   const followingIds = new Set(friends.filter((f) => f.isFollowing).map((f) => f.id));
-  const feed = [...experiences]
+
+  const allFeed = [...experiences]
     .filter((e) => followingIds.has(e.friendId))
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
+  const filtered = allFeed.filter((e) => {
+    if (filter === 'hometown') return e.isHometown;
+    if (filter === 'travel') return !e.isHometown;
+    if (filter === 'thisweek') return isThisWeek(new Date(e.createdAt));
+    return true;
+  });
+
+  // Counts for filter chips
+  const hometownCount = allFeed.filter((e) => e.isHometown).length;
+  const travelCount = allFeed.filter((e) => !e.isHometown).length;
+  const thisWeekCount = allFeed.filter((e) => isThisWeek(new Date(e.createdAt))).length;
+
   const onRefresh = () => {
     setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 1000);
+    setTimeout(() => setRefreshing(false), 800);
   };
+
+  const FILTERS: { key: FeedFilter; label: string; count: number }[] = [
+    { key: 'all', label: 'All', count: allFeed.length },
+    { key: 'hometown', label: '🏠 Hometown', count: hometownCount },
+    { key: 'travel', label: '✈️ Travel', count: travelCount },
+    { key: 'thisweek', label: '📅 This week', count: thisWeekCount },
+  ];
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -129,31 +172,48 @@ export function FeedScreen() {
       <View style={styles.header}>
         <Text style={styles.logo}>🌿 Roam</Text>
         <TouchableOpacity
-          style={styles.headerBtn}
+          style={styles.logBtn}
           onPress={() => navigation.navigate('Log')}
+          activeOpacity={0.85}
         >
-          <Text style={styles.headerBtnText}>+ Log memory</Text>
+          <Text style={styles.logBtnText}>+ Log</Text>
         </TouchableOpacity>
       </View>
 
-      {/* New posts banner */}
-      {newPostsBanner && (
-        <TouchableOpacity style={styles.newPostsBanner} onPress={() => setNewPostsBanner(false)}>
-          <Text style={styles.newPostsText}>↑ New memories from your friends</Text>
-        </TouchableOpacity>
-      )}
+      {/* Filter chips */}
+      <ScrollView
+        horizontal showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.filters}
+        style={styles.filtersWrap}
+      >
+        {FILTERS.map((f) => (
+          <TouchableOpacity
+            key={f.key}
+            style={[styles.filterChip, filter === f.key && styles.filterChipActive]}
+            onPress={() => setFilter(f.key)}
+            activeOpacity={0.75}
+          >
+            <Text style={[styles.filterChipText, filter === f.key && styles.filterChipTextActive]}>
+              {f.label}
+            </Text>
+            {f.count > 0 && (
+              <View style={[styles.filterCount, filter === f.key && styles.filterCountActive]}>
+                <Text style={[styles.filterCountText, filter === f.key && { color: Colors.pine }]}>
+                  {f.count}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
 
       <FlatList
-        data={feed}
+        data={filtered}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={Colors.pine}
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.pine} />
         }
         ItemSeparatorComponent={() => <View style={{ height: Spacing.lg }} />}
         renderItem={({ item }) => (
@@ -164,26 +224,29 @@ export function FeedScreen() {
           />
         )}
         ListHeaderComponent={
-          <View style={styles.feedHeader}>
-            <Text style={styles.feedHeaderTitle}>Friends' feed</Text>
-            <Text style={styles.feedHeaderSub}>
-              {feed.length} memories · {followingIds.size} friends
-            </Text>
-          </View>
+          filter === 'thisweek' && filtered.length > 0 ? (
+            <View style={styles.weekendBanner}>
+              <Text style={styles.weekendBannerText}>
+                💡 {filtered.length} thing{filtered.length !== 1 ? 's' : ''} your friends did this week near you
+              </Text>
+            </View>
+          ) : null
         }
         ListEmptyComponent={
           <View style={styles.empty}>
             <Text style={styles.emptyIcon}>✦</Text>
-            <Text style={styles.emptyTitle}>Your feed is empty</Text>
-            <Text style={styles.emptyText}>
-              Follow friends and they'll show up here every time they log a memory.
+            <Text style={styles.emptyTitle}>
+              {filter === 'hometown' ? 'No hometown logs yet' :
+               filter === 'thisweek' ? 'Quiet week so far' :
+               'Your feed is empty'}
             </Text>
-            <TouchableOpacity
-              style={styles.findFriendsBtn}
-              onPress={() => {}}
-            >
-              <Text style={styles.findFriendsBtnText}>Find friends</Text>
-            </TouchableOpacity>
+            <Text style={styles.emptyText}>
+              {filter === 'hometown'
+                ? 'When your friends log something in their city — a restaurant, a hike, a random Thursday night — it shows up here.'
+                : filter === 'thisweek'
+                ? "Check back Sunday — this fills up fast when your friends have a good weekend."
+                : 'Follow friends and their memories show up here every time they log something — travel or at home.'}
+            </Text>
           </View>
         }
       />
@@ -197,57 +260,91 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: Spacing.lg, paddingVertical: Spacing.md,
     borderBottomWidth: 1, borderBottomColor: Colors.border,
-    backgroundColor: Colors.warm,
   },
   logo: { fontSize: 20, fontWeight: '800', color: Colors.pine },
-  headerBtn: {
+  logBtn: {
     backgroundColor: Colors.terracotta, borderRadius: Radius.full,
     paddingHorizontal: Spacing.md, paddingVertical: 7,
   },
-  headerBtnText: { color: '#fff', fontSize: 13, fontWeight: '700' },
-  newPostsBanner: {
-    backgroundColor: Colors.pine, paddingVertical: Spacing.sm,
-    alignItems: 'center',
-  },
-  newPostsText: { color: '#fff', fontSize: 13, fontWeight: '600' },
-  list: { padding: Spacing.lg, paddingBottom: 100 },
-  feedHeader: { marginBottom: Spacing.lg },
-  feedHeaderTitle: { ...Typography.displaySmall, color: Colors.ink },
-  feedHeaderSub: { ...Typography.bodySmall, color: Colors.muted, marginTop: 2 },
+  logBtnText: { color: '#fff', fontSize: 13, fontWeight: '700' },
 
-  // Cards
+  // Filters
+  filtersWrap: {
+    borderBottomWidth: 1, borderBottomColor: Colors.border,
+    backgroundColor: Colors.warm,
+  },
+  filters: {
+    paddingHorizontal: Spacing.lg, paddingVertical: Spacing.sm, gap: Spacing.xs,
+  },
+  filterChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 5,
+    paddingHorizontal: Spacing.md, paddingVertical: 7,
+    borderRadius: Radius.full, borderWidth: 1.5, borderColor: Colors.border,
+    backgroundColor: 'transparent',
+  },
+  filterChipActive: { backgroundColor: Colors.pine, borderColor: Colors.pine },
+  filterChipText: { fontSize: 13, fontWeight: '600', color: Colors.muted },
+  filterChipTextActive: { color: '#fff' },
+  filterCount: {
+    backgroundColor: Colors.sand, borderRadius: Radius.full,
+    paddingHorizontal: 6, paddingVertical: 1,
+  },
+  filterCountActive: { backgroundColor: 'rgba(255,255,255,0.25)' },
+  filterCountText: { fontSize: 10, fontWeight: '700', color: Colors.muted },
+
+  list: { padding: Spacing.lg, paddingBottom: 100 },
+
+  weekendBanner: {
+    backgroundColor: Colors.sand, borderRadius: Radius.md,
+    padding: Spacing.md, marginBottom: Spacing.lg,
+    borderWidth: 1, borderColor: Colors.border,
+  },
+  weekendBannerText: { fontSize: 13, color: Colors.ink, fontWeight: '600', lineHeight: 18 },
+
+  // Card
   card: {
     backgroundColor: Colors.card, borderRadius: Radius.xl,
     overflow: 'hidden', borderWidth: 1, borderColor: Colors.border,
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06, shadowRadius: 8, elevation: 2,
+    shadowOpacity: 0.05, shadowRadius: 8, elevation: 2,
   },
-  cardPhoto: { width: '100%', height: 220, resizeMode: 'cover' },
+  cardPhoto: { width: '100%', height: 200, resizeMode: 'cover' },
   cardPhotoFallback: {
-    width: '100%', height: 140,
+    width: '100%', height: 120,
     alignItems: 'center', justifyContent: 'center',
   },
-  cardPhotoEmoji: { fontSize: 52 },
+  cardPhotoEmoji: { fontSize: 44 },
+  hometownBadge: {
+    position: 'absolute', bottom: Spacing.sm, left: Spacing.sm,
+    backgroundColor: 'rgba(0,0,0,0.45)', borderRadius: Radius.full,
+    paddingHorizontal: Spacing.sm, paddingVertical: 3,
+  },
+  hometownBadgeText: { color: '#fff', fontSize: 11, fontWeight: '700' },
   cityPill: {
     position: 'absolute', top: Spacing.md, left: Spacing.md,
     backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: Radius.full,
     paddingHorizontal: Spacing.sm, paddingVertical: 4,
   },
   cityPillText: { color: '#fff', fontSize: 11, fontWeight: '700' },
+
   cardBody: { padding: Spacing.lg },
   authorRow: {
-    flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
-    marginBottom: Spacing.md,
+    flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginBottom: Spacing.md,
   },
   authorMeta: { flex: 1 },
   authorName: { fontSize: 13, fontWeight: '700', color: Colors.ink },
   authorTime: { fontSize: 11, color: Colors.muted },
   cardName: {
-    fontSize: 20, fontWeight: '800', color: Colors.ink,
-    letterSpacing: -0.3, marginBottom: 6,
+    fontSize: 19, fontWeight: '800', color: Colors.ink,
+    letterSpacing: -0.3, marginBottom: 3,
   },
-  ratingRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, marginBottom: Spacing.md },
-  ratingNum: { fontSize: 13, fontWeight: '700', color: Colors.ink },
+  cardLocation: { fontSize: 12, color: Colors.muted, marginBottom: Spacing.sm },
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginBottom: Spacing.md },
+  moodPill: {
+    paddingHorizontal: Spacing.sm, paddingVertical: 3,
+    borderRadius: Radius.full,
+  },
+  moodText: { fontSize: 12, fontWeight: '700' },
   cardQuote: {
     fontSize: 14, color: '#444', lineHeight: 21,
     fontStyle: 'italic', marginBottom: Spacing.md,
@@ -261,14 +358,8 @@ const styles = StyleSheet.create({
   },
   echoBtnText: { fontSize: 13, fontWeight: '700', color: Colors.ink },
 
-  // Empty
-  empty: { alignItems: 'center', paddingTop: 60, paddingHorizontal: 40 },
-  emptyIcon: { fontSize: 36, color: Colors.pine, marginBottom: Spacing.lg },
-  emptyTitle: { ...Typography.titleLarge, color: Colors.ink, marginBottom: Spacing.sm },
-  emptyText: { ...Typography.bodyMedium, color: Colors.muted, textAlign: 'center', lineHeight: 22, marginBottom: Spacing.xl },
-  findFriendsBtn: {
-    backgroundColor: Colors.pine, borderRadius: Radius.full,
-    paddingHorizontal: Spacing.xl, paddingVertical: Spacing.md,
-  },
-  findFriendsBtnText: { color: '#fff', fontSize: 14, fontWeight: '700' },
+  empty: { alignItems: 'center', paddingTop: 60, paddingHorizontal: 36 },
+  emptyIcon: { fontSize: 32, color: Colors.pine, marginBottom: Spacing.lg },
+  emptyTitle: { ...Typography.titleLarge, color: Colors.ink, marginBottom: Spacing.sm, textAlign: 'center' },
+  emptyText: { ...Typography.bodyMedium, color: Colors.muted, textAlign: 'center', lineHeight: 22 },
 });

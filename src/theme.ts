@@ -10,13 +10,14 @@ export const Colors = {
   muted: '#7A756D',
   border: '#E5DFD5',
   card: '#FFFFFF',
-  // Pin colors by type
   pinFood: '#E8744A',
   pinNature: '#4CAF78',
   pinNightlife: '#7B5EA7',
   pinTip: '#F5C842',
   pinStay: '#4A90B8',
   pinCulture: '#E85A8A',
+  pinEvent: '#E8744A',
+  pinEveryday: '#A0896A',
 };
 
 export const TypeColors: Record<string, string> = {
@@ -26,6 +27,8 @@ export const TypeColors: Record<string, string> = {
   tip: Colors.pinTip,
   stay: Colors.pinStay,
   culture: Colors.pinCulture,
+  event: '#E06B2A',
+  everyday: '#A0896A',
 };
 
 export const TypeBgColors: Record<string, string> = {
@@ -35,6 +38,8 @@ export const TypeBgColors: Record<string, string> = {
   tip: '#FEF7DC',
   stay: '#DFF0FA',
   culture: '#FDE5EF',
+  event: '#FDE8D5',
+  everyday: '#F0EAE0',
 };
 
 export const TypeTextColors: Record<string, string> = {
@@ -44,6 +49,8 @@ export const TypeTextColors: Record<string, string> = {
   tip: '#8A6D0E',
   stay: '#2A6F9B',
   culture: '#C0336A',
+  event: '#B85A1A',
+  everyday: '#7A6550',
 };
 
 export const TypeEmojis: Record<string, string> = {
@@ -53,6 +60,22 @@ export const TypeEmojis: Record<string, string> = {
   tip: '💡',
   stay: '🏨',
   culture: '🎭',
+  event: '🎟',
+  everyday: '✦',
+};
+
+export const MoodColors: Record<string, string> = {
+  'loved it': '#4CAF78',
+  'solid': '#4A90B8',
+  'meh': '#F5C842',
+  'skip it': '#E85A8A',
+};
+
+export const MoodEmojis: Record<string, string> = {
+  'loved it': '🔥',
+  'solid': '👍',
+  'meh': '😐',
+  'skip it': '👎',
 };
 
 export const Typography = {
@@ -70,22 +93,11 @@ export const Typography = {
 };
 
 export const Spacing = {
-  xs: 4,
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 20,
-  xxl: 24,
-  xxxl: 32,
+  xs: 4, sm: 8, md: 12, lg: 16, xl: 20, xxl: 24, xxxl: 32,
 };
 
 export const Radius = {
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 20,
-  full: 999,
+  sm: 8, md: 12, lg: 16, xl: 20, full: 999,
 };
 
-// Additional color used in PreTripScreen
 export const pineMid = '#2D5C1A';
